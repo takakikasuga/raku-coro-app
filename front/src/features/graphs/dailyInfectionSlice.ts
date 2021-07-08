@@ -44,6 +44,7 @@ export const fetchDailyInfectionAsync = createAsyncThunk<
       'https://www3.nhk.or.jp/n-data/opendata/coronavirus/nhk_news_covid19_prefectures_daily_data.csv'
     )
     .then((response) => {
+      console.log('response', response.data);
       const fetch_daily_infection = Papa.parse(response.data, {
         // csvヘッダーをプロパティに変更
         header: true,
@@ -52,8 +53,14 @@ export const fetchDailyInfectionAsync = createAsyncThunk<
         // 文字化け防止
         encoding: 'Shift-JIS',
         // エラーを取り除く
+        complete: function (result: any) {
+          console.log('result', result);
+          // executed after all files are complete
+        },
         skipEmptyLines: true,
-        transformHeader: function (header: string): string{
+
+        transformHeader: function (header: string): string {
+          console.log('header', header);
           if (header === '各地の感染者数_1日ごとの発表数') {
             return 'daily_infection';
           } else if (header === '各地の感染者数_累計') {
@@ -73,6 +80,7 @@ export const fetchDailyInfectionAsync = createAsyncThunk<
           }
         },
       });
+      console.log('fetch_daily_infection', fetch_daily_infection);
       // 取得したデータだけを取り出す
       const fetch_daily_infection_data = fetch_daily_infection.data as Data[];
       // 取り出したデータを格納する
@@ -110,6 +118,7 @@ export const dailyInfectionSlice = createSlice({
 
 //useAppSelectorで呼び出したいデーターをここで定義
 export const selectDailyInfection = (state: RootState) => state.dailyInfection;
-export const selectDailyInfectionStatus = (state: RootState) => state.dailyInfection.status;
+export const selectDailyInfectionStatus = (state: RootState) =>
+  state.dailyInfection.status;
 
 export default dailyInfectionSlice.reducer;
